@@ -2907,20 +2907,35 @@ async function updateSketchfabByAnno(annoInput){
         const existingVideo = document.getElementById(`video${cameraIndex}`);
         if (existingVideo) existingVideo.remove();
     
+        // ===== ตรวจว่าเป็น live stream (คงเดิม) =====
         const isStream = imgSrc && (
             imgSrc.includes(":8080") ||
             imgSrc.includes(":8888") ||
             imgSrc.includes("/cam")
         );
     
+        // ===== 🆕 ตรวจว่าเป็นภาพนิ่งที่รองรับ =====
+        const isStaticImage = imgSrc && (
+            imgSrc.startsWith("https://lh3.googleusercontent.com/") ||   // Google Drive/Photos
+            imgSrc.startsWith("https://drive.google.com/") ||            // Google Drive โดยตรง
+            imgSrc.startsWith("https://i.postimg.cc/") ||                // Postimg
+            imgSrc.startsWith("https://i.imgur.com/") ||                 // Imgur
+            /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(imgSrc)    // ไฟล์รูปทั่วไป
+        );
+    
         if (isStream) {
             console.log("STREAM DETECTED:", imgSrc);
-    
             modalImg.src = imgSrc;
             modalImg.style.display = "block";
     
-        } else if (imgSrc && imgSrc.startsWith("https://lh3.googleusercontent.com/")) {
+        } else if (isStaticImage) {
+            console.log("STATIC IMAGE DETECTED:", imgSrc);
+            modalImg.src = imgSrc;
+            modalImg.style.display = "block";
     
+        } else if (imgSrc && imgSrc.startsWith("http")) {
+            // 🆕 fallback: ถ้าเป็น URL http(s) อื่น ๆ ที่ไม่แน่ใจ ให้ลองแสดงเป็นรูป
+            console.log("FALLBACK IMAGE:", imgSrc);
             modalImg.src = imgSrc;
             modalImg.style.display = "block";
     
